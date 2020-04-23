@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>AssetAPIEndpoint</fullName>
+        <categories>API Calls</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>AssetAPIEndpoint</shortDescription>
+        <value>https://eu1.anypoint.mulesoft.com/mocking/api/v1/sources/exchange/assets/a9111cc7-7a75-420b-996d-c403e449fb82/man-join-data-hub/1.0.2/m/JOINTHEDIGITALHUB</value>
+    </labels>
+    <labels>
+        <fullName>ClientIdKey</fullName>
+        <categories>API Calls</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>ClientIdKey</shortDescription>
+        <value>client-id</value>
+    </labels>
+    <labels>
+        <fullName>ClientIdValue</fullName>
+        <categories>API Calls</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>ClientIdValue</shortDescription>
+        <value>b903e91e6c6542a3a4a6e800f37f95ea</value>
+    </labels>
+    <labels>
+        <fullName>ClientSecretKey</fullName>
+        <categories>API Calls</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>ClientSecretKey</shortDescription>
+        <value>client-secret</value>
+    </labels>
+    <labels>
+        <fullName>ClientSecretValue</fullName>
+        <categories>API Calls</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>ClientSecretValue</shortDescription>
+        <value>4d73e495F84E4c47B8a8E37C8F8B96b3</value>
+    </labels>
+    <labels>
+        <fullName>CorrelationIdKey</fullName>
+        <categories>API Calls</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CorrelationIdKey</shortDescription>
+        <value>correlation-id</value>
+    </labels>
+    <labels>
+        <fullName>CorrelationIdValue</fullName>
+        <categories>API Calls</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>CorrelationIdValue</shortDescription>
+        <value>a9111cc7-7a75-420b-996d-c403e449fb82</value>
+    </labels>
+</CustomLabels>
