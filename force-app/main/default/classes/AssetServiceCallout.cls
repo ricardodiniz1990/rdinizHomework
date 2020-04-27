@@ -1,26 +1,22 @@
-public class AssetServiceCallout {   
+public class AssetServiceCallout { 
     
+    /*
+     * Method to call the endpoint with the needed header attributes
+	*/    
     @AuraEnabled
     public static void getAssetServiceInfo(){
         HttpRequest req = new HttpRequest();
         String endpoint = Label.AssetAPIEndpoint;
-        //req.setEndpoint('https://eu1.anypoint.mulesoft.com/mocking/api/v1/sources/exchange/assets/a9111cc7-7a75-420b-996d-c403e449fb82/man-join-data-hub/1.0.2/m/JOINTHEDIGITALHUB');
         req.setEndpoint(endpoint);
         req.setMethod('GET');
         
-        //string clientIdKey = 'client-id';
         string clientIdKey = Label.ClientIdKey;
-        //string clientSecretKey = 'client-secret';
         string clientSecretKey = Label.ClientSecretKey;
-        //string correlationIdKey = 'correlation-id';
         string correlationIdKey = Label.CorrelationIdKey;
         
         string clientIdValue = Label.ClientIdValue;
-        //string clientIdValue = 'b903e91e6c6542a3a4a6e800f37f95ea';
         string clientSecretValue = Label.ClientSecretValue;
-        //string clientSecretValue = '4d73e495F84E4c47B8a8E37C8F8B96b3';
         string correlationIdValue = Label.CorrelationIdValue;
-        //string correlationIdValue = 'a9111cc7-7a75-420b-996d-c403e449fb82';
                 
         req.setHeader(clientIdKey, clientIdValue);
         req.setHeader(clientSecretKey, clientSecretValue);
@@ -28,18 +24,19 @@ public class AssetServiceCallout {
         
         Http http = new Http();
         HTTPResponse res = http.send(req);
-        System.debug(res.getBody());
         
         parseJSONString(res.getBody());
         
     }
     
+    /*
+     * Method to parse the response JSON
+	*/
     @AuraEnabled
     public static void parseJSONString(String jsonStr) {
 
         List<Map<String, Object>> objectsRetreived = new List<Map<String, Object>>();
         
-        //jsonStr = '{"assetInfoList":['+jsonStr+','+jsonStr+']}';
         jsonStr = '{"assetInfoList":['+jsonStr+']}';
 
         system.debug('jsonStr: ' + jsonStr);
@@ -54,10 +51,6 @@ public class AssetServiceCallout {
                         AssetInfo assetInfo = (AssetInfo)parser.readValueAs(AssetInfo.class);
                         // serialize again to verify what was parsed.
                         String s = JSON.serialize(assetInfo);
-                        system.debug('Serialized ASSET INFO: ' + s);
-
-                        system.debug('DESEREALIZE TEST: ' + (AssetInfo) System.JSON.deserialize(s, AssetInfo.class));
-
                         Map<String, Object> m = (Map<String, Object>)JSON.deserializeUntyped(s);
                         
                        	objectsRetreived.add(m);
@@ -70,7 +63,10 @@ public class AssetServiceCallout {
         }
         assetMapping(objectsRetreived);
     }
-
+    
+    /*
+     * Method to map into the Asset object and its related Measuting Point and Vehicle Text Data records
+	*/
     @AuraEnabled
     public static void assetMapping(List<Map<String, Object>> objectInfo){
         List<String> vinsToReturn = new List<String>();
@@ -86,7 +82,8 @@ public class AssetServiceCallout {
         
         List<Vehicle_Text_Data__c> existingVehicleTextData = [SELECT Id, Information_Text__c, Note_Text__c, Asset__c FROM Vehicle_Text_Data__c WHERE Asset__c IN :getTheAsset];
         List<Measuring_Point__c> existingMeasuringPoints = [SELECT Id, Asset__c, Counter_Reading__c FROM Measuring_Point__c WHERE Asset__c IN :getTheAsset];
-
+		
+        //Take the JSON data already parsed into a map, and set the respective Asset fields
         for(Map<String, Object> assObj : objectInfo){
             String theVin = (String)assObj.get('vin');
             for(Asset ast : getTheAsset){
@@ -120,6 +117,7 @@ public class AssetServiceCallout {
                 mesPoint.Measure_Point_Unit__c = (String)mPointData.get('mpUnit');
                 mesPoint.Asset__c = ast.Id;
                 
+                // Create the related Measuring Point if there is none with the same CounterReading for this Asset record
                 Boolean alreadyExists = false;
                 for(Measuring_Point__c mPoint : existingMeasuringPoints){
                     if(mesPoint.Asset__c == mPoint.Asset__c && mesPoint.Counter_Reading__c == mPoint.Counter_Reading__c){
@@ -130,6 +128,7 @@ public class AssetServiceCallout {
                 	newMeasuringPoints.add(mesPoint);    
                 }
                 
+                //Build the related Vehicle Text Data from the info on the JSON
                 Vehicle_Text_Data__c vTData = new Vehicle_Text_Data__c();
                 
                 if(!existingVehicleTextData.isEmpty()){
@@ -137,28 +136,20 @@ public class AssetServiceCallout {
                 }
                 
                 Map<String, Object> vTextData = (Map<String, Object>)assObj.get('vehicleTextData');
-                System.debug(':: RD :: vTextData: ' + vTextData);
-                System.debug(':: RD :: vTextData: ' + vTextData.get('informationText'));
-                System.debug(':: RD :: vTextData: ' + vTextData.get('noteText'));
                 
                 Map<String, Object> informationText = (Map<String, Object>)vTextData.get('informationText');
-                System.debug(':: RD :: informationText: ' + informationText);
                 vTData.Information_text__c = (String)informationText.get('textLine');
-                System.debug(':: RD :: informationText: ' + informationText.get('textLine'));
                 
                 List<Object> noteTexts = (List<Object>)vTextData.get('noteText');
                 vTData.Note_Text__c = '';
                 for(Object result : noteTexts){
-                    System.debug(':: RD :: noteText: ' + (Map<String,Object>)result);
                     Map<String,Object> noteText = (Map<String,Object>)result;
                     if(noteText.get('tagColumn') != null){
                         vTData.Note_Text__c += '\n' + noteText.get('tagColumn');
                     }
-                    System.debug(':: RD :: noteText: ' + noteText.get('tagColumn'));
                     if(noteText.get('textLine') != null){
                         vTData.Note_Text__c += '\n' + noteText.get('textLine');
                     }
-                    System.debug(':: RD :: noteText: ' + noteText.get('textLine'));
                 }
                 
                 if(vTData.Asset__c == null){
@@ -172,6 +163,9 @@ public class AssetServiceCallout {
         upsert upsertVehicleTextData;
     }
     
+    /*
+     * Method to parse a string from "yyyymmdd" format to Date instance 
+	*/
     @AuraEnabled
     public static Date getDateValue(String dateString){
         String year1 = dateString.left(4);
